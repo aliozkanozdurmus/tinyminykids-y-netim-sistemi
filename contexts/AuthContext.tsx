@@ -1,0 +1,90 @@
+import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { AuthenticatedSession, UserRole } from '../types';
+import { apiService } from '../services/apiService';
+
+// Re-export UserRole for convenience in other files
+export { UserRole };
+
+interface AuthContextType {
+  session: AuthenticatedSession | null;
+  login: (role: UserRole, password_plain: string) => Promise<boolean>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [session, setSession] = useState<AuthenticatedSession | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadSessionFromStorage = useCallback(() => {
+    setIsLoading(true);
+    const storedSession = localStorage.getItem('currentSession');
+    if (storedSession) {
+      try {
+        const parsedSession = JSON.parse(storedSession) as AuthenticatedSession;
+        if (parsedSession && parsedSession.role && parsedSession.displayName) {
+          setSession(parsedSession);
+        } else {
+          localStorage.removeItem('currentSession');
+        }
+      } catch (error) {
+        console.error("Failed to parse session from storage", error);
+        localStorage.removeItem('currentSession');
+      }
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    // Initialize role passwords (sets defaults if not exist) and checks admin .env password
+    apiService.initializeRolePasswords()
+      .then(() => {
+        // Seed products if none exist
+        return apiService.seedInitialProductData();
+      })
+      .then(() => {
+        // Then load any existing session
+        loadSessionFromStorage();
+      })
+      .catch(error => {
+        console.error("Error during application initialization (passwords/seeding):", error);
+        // Attempt to load session anyway, or set an error state for the application
+        loadSessionFromStorage(); 
+      });
+  }, [loadSessionFromStorage]);
+
+  const login = async (role: UserRole, password_plain: string): Promise<boolean> => {
+    setIsLoading(true);
+    const loggedInSession = await apiService.loginUser(role, password_plain);
+    if (loggedInSession) {
+      setSession(loggedInSession);
+      localStorage.setItem('currentSession', JSON.stringify(loggedInSession));
+      setIsLoading(false);
+      return true;
+    }
+    setIsLoading(false);
+    return false;
+  };
+
+  const logout = () => {
+    setSession(null);
+    localStorage.removeItem('currentSession');
+  };
+
+  if (isLoading && !session) {
+     return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary-DEFAULT"></div>
+            <p className="ml-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Yükleniyor...</p>
+        </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={{ session, login, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

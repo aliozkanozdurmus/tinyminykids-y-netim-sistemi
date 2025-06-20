@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TinyMinyKids Yönetim Sistemi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Enables class-based dark mode
+      theme: {
+        extend: {
+          colors: {
+            primary: { // Amber tones
+              light: 'var(--color-primary-light, #FDE68A)', // amber-300
+              DEFAULT: 'var(--color-primary-DEFAULT, #FBBF24)', // amber-500
+              dark: 'var(--color-primary-dark, #B45309)',  // amber-700
+            },
+            secondary: { // Orange tones
+              light: '#FDBA74', // orange-300
+              DEFAULT: '#FB923C', // orange-400 (using 400 for a slightly softer default)
+              dark: '#C2410C',   // orange-700
+            },
+            accent: { // Yellow tones
+              light: '#FEF3C7', // yellow-200
+              DEFAULT: '#FDE08E', // yellow-300
+              dark: '#FACC15',   // yellow-400
+            }
+          },
+          animation: {
+            'ping-slow': 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+          }
+        }
+      }
+    }
+  </script>
+  
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2",
+    "framer-motion": "https://esm.sh/framer-motion@^12.18.1",
+    "xlsx": "https://esm.sh/xlsx@0.18.5",
+    "file-saver": "https://esm.sh/file-saver@2.0.5",
+    "@google/genai": "https://esm.sh/@google/genai"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
