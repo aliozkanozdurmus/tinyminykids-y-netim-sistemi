@@ -17,6 +17,7 @@ ENV POSTGRES_USER=orderdb \
 WORKDIR /app
 
 # Copy and build backend
+COPY drizzle/ ./drizzle
 COPY server/ ./server
 RUN cd server && npm install && npm run build && npm prune --production
 

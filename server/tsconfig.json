@@ -6,5 +6,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["*.ts", "../drizzle/**/*.ts"]
 }
