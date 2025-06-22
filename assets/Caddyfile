@@ -1,4 +1,4 @@
-order.tinyminykids.com:3000
+order.tinyminykids.com
 
 root * /app/dist
 
