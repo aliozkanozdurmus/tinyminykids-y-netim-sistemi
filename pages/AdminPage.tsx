@@ -672,8 +672,12 @@ const LogRecords: React.FC = () => {
 // Settings Management Component
 const SettingsManagement: React.FC = () => {
     const themeContext = useContext(ThemeContext);
-    const authContext = useContext(AuthContext); 
+    const authContext = useContext(AuthContext);
     const navigate = useNavigate();
+
+    // Local state for App Name and Logo URL inputs
+    const [localAppName, setLocalAppName] = useState<string>(themeContext?.appName || '');
+    const [localLogoUrl, setLocalLogoUrl] = useState<string>(themeContext?.logoUrl || '');
 
     if (!themeContext || !authContext) return <p>Tema veya Oturum Yöneticisi yüklenemedi.</p>;
     
@@ -998,19 +1002,6 @@ const SettingsManagement: React.FC = () => {
                     )}
                 </div>
 
-                 {/* Data Backup and Restore Section */}
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <h3 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-1 flex items-center">
-                        {ICONS.settings("w-5 h-5 mr-2")} Veri Yedekleme ve Geri Yükleme
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        Uygulamanın tüm verilerini (ürünler, siparişler, kullanıcılar, ayarlar, loglar vb.) yedekleyin veya bir yedekten geri yükleyin. Bu işlem sadece "Yerel Depolama" veri kaynağı aktifken geçerlidir.
-                    </p>
-                    <FeedbackDisplay message={backupRestoreFeedback} />
-                    <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2 p-2 bg-yellow-50 dark:bg-yellow-700/30 rounded border border-yellow-200 dark:border-yellow-600">
-                        Yedekleme ve geri yükleme işlemleri backend API üzerinden yapılmalıdır.
-                    </p>
-                </div>
             </div>
         </AdminSection>
     );
