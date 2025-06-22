@@ -12,6 +12,8 @@ RUN cd backend && npm install
 
 # Copy all sources
 COPY . .
+# Generate runtime config
+RUN cp config.js.template config.js
 
 # Build frontend (Vite)
 RUN npm run build
@@ -26,6 +28,8 @@ WORKDIR /app
 # Copy built backend and frontend
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/dist ./dist
+# Copy generated config for frontend
+COPY --from=builder /app/config.js ./dist/config.js
 
 # Copy environment example
 COPY --from=builder /app/backend/.env.example .env

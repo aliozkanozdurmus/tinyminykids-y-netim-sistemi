@@ -11,6 +11,7 @@ FROM node:18-alpine
 WORKDIR /app
 COPY --from=build /app/dist ./dist
 COPY backend/.env.example .env
+COPY backend/package.json backend/package-lock.json* ./
 RUN npm install --production
 EXPOSE 3000
 CMD ["node", "dist/app.js"]
