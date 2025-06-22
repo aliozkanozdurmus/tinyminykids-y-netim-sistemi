@@ -6,8 +6,14 @@
     "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types", "node_modules/dotenv/types"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
-  }
+  },
+  "include": ["src", "src/types"]
 }
