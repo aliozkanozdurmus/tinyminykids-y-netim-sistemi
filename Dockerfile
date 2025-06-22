@@ -31,7 +31,7 @@ RUN pnpm run build
 COPY assets/Caddyfile /etc/caddy/Caddyfile
 
 # Expose ports
-EXPOSE 5432 4000 80 443
+EXPOSE 5432 3000 80 443
 
 # Entrypoint: start Postgres, migrations, backend, and Caddy
 CMD pg_ctl -D "$PGDATA" -o "-c listen_addresses='*'" start && \
