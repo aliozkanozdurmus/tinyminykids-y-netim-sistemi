@@ -14,7 +14,18 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY backend/.env.example .env
 COPY backend/.env.example .env
-# Use dependencies installed in build stage
-# (node_modules copied from build stage; no need to reinstall)
+# Remove any accidental host node_modules
+RUN rm -rf ./node_modules
+# Copy package.json so npm can install dependencies inside runtime container
+COPY backend/package.json ./
+# Copy prisma schema so client can be generated
+COPY backend/prisma ./prisma
+# Install build tools for native modules
+RUN apk add --no-cache python3 make g++
+# Install dependencies for correct OS/arch
+RUN npm install --production
+# Generate Prisma client for runtime
+RUN npx prisma generate
+# Run migrations before starting server
 EXPOSE 3000
-CMD ["node", "dist/app.js"]
+CMD npx prisma migrate deploy && node dist/app.js

@@ -210,7 +210,7 @@ export const apiService = {
         const response = await fetch(`${BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userIdOrRole, password: password_plain }),
+            body: JSON.stringify({ username: userIdOrRole, password: password_plain }),
         });
         if (!response.ok) {
              if (response.status === 401) { // Unauthorized

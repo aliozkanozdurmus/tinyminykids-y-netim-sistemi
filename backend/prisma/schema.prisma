@@ -36,6 +36,7 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  orders       Order[]
 }
 
 model Product {
@@ -44,7 +45,8 @@ model Product {
   price      Float
   category   String
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt    DateTime @updatedAt
+  orderItems OrderItem[]
 }
 
 model Table {
@@ -53,6 +55,7 @@ model Table {
   status     TableStatus
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  orders     Order[]
 }
 
 model Order {
@@ -63,6 +66,7 @@ model Order {
   createdAt  DateTime    @default(now())
   table      Table       @relation(fields: [tableId], references: [id])
   user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
 }
 
 model OrderItem {

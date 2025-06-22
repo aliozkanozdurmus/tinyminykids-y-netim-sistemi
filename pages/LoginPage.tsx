@@ -10,10 +10,9 @@ import Modal from '../components/shared/Modal';
 import { ICONS, ROLE_DISPLAY_NAMES, DEFAULT_LOGO_URL } from '../constants';
 
 const LoginPage: React.FC = () => {
+  // Password state removed for admin login (passwordless)
   const [selectedRoleForPassword, setSelectedRoleForPassword] = useState<UserRole | null>(null);
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   
   const authContext = useContext(AuthContext);
   const themeContext = useContext(ThemeContext);
@@ -40,8 +39,7 @@ const LoginPage: React.FC = () => {
   const { appName, logoUrl, passwordProtectionActive } = themeContext;
 
   const handleRoleSelect = async (role: UserRole) => {
-    setSelectedRoleForPassword(role); // Store for password modal if needed
-    setPassword('');
+    setSelectedRoleForPassword(role);
     setError('');
 
     if (role !== UserRole.ADMIN) {
@@ -50,29 +48,15 @@ const LoginPage: React.FC = () => {
         navigate(`/select-user/${rolePath}`);
         return;
     }
-    
-    // Admin role logic
-    if (!passwordProtectionActive) { 
-      const success = await login(UserRole.ADMIN, "__SIFRE_AC_DISABLED_VIA_ADMIN_PANEL__"); 
-      if (!success) {
-        setError('Yönetici girişi yapılamadı. Lütfen sistem yöneticisi ile iletişime geçin.');
-      }
-    } else {
-      setIsPasswordModalOpen(true);
+
+    // Always allow admin login without password
+    const success = await login(UserRole.ADMIN, "__SIFRE_AC_DISABLED_VIA_ADMIN_PANEL__");
+    if (!success) {
+      setError('Yönetici girişi yapılamadı. Lütfen sistem yöneticisi ile iletişime geçin.');
     }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedRoleForPassword) return; // Should only be admin at this point
-    setError('');
-    const success = await login(selectedRoleForPassword, password); // selectedRoleForPassword should be 'admin'
-    if (success) {
-      setIsPasswordModalOpen(false);
-    } else {
-      setError('Şifre hatalı. Lütfen tekrar deneyin.');
-    }
-  };
+  // handlePasswordSubmit removed: password modal never appears for admin anymore
 
   const loginRoles = [
     { role: UserRole.ADMIN, label: ROLE_DISPLAY_NAMES[UserRole.ADMIN], icon: ICONS.user("w-10 h-10") },
@@ -138,33 +122,7 @@ const LoginPage: React.FC = () => {
         
       </motion.div>
 
-      {selectedRoleForPassword === UserRole.ADMIN && isPasswordModalOpen && passwordProtectionActive && (
-        <Modal
-          isOpen={isPasswordModalOpen}
-          onClose={() => setIsPasswordModalOpen(false)}
-          title={`${ROLE_DISPLAY_NAMES[UserRole.ADMIN]} Şifresi`}
-          size="sm"
-          titleIcon={ICONS.lock("w-5 h-5")}
-        >
-          <form onSubmit={handlePasswordSubmit} className="space-y-4 pt-2">
-            <Input
-              label="Şifre"
-              name="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              leftIcon={ICONS.lock()}
-              placeholder="Şifrenizi girin"
-              required
-              autoFocus
-            />
-            {error && <p className="text-sm text-red-500 dark:text-red-400 text-center -mt-2">{error}</p>}
-            <Button type="submit" isLoading={authLoading} className="w-full mt-2" size="lg">
-              Giriş Yap
-            </Button>
-          </form>
-        </Modal>
-      )}
+      {/* Admin no longer requires password modal */}
     </div>
   );
 };

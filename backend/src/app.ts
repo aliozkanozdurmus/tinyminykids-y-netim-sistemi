@@ -15,13 +15,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
-
-app.use(express.static(path.join(__dirname, '../..', 'dist')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../..', 'dist', 'index.html'));
-});
-
 app.use('/api/health', healthRouter);
+
+  // Static file serving removed for Docker: handled by NGINX in production
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

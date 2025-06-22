@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
-RUN mkdir -p public && printf "window._env_ = { BACKEND_API_URL: \\\"$BACKEND_API_URL\\\" };" > public/config.js
+RUN mkdir -p public && echo "window._env_ = { BACKEND_API_URL: 'http://localhost:3000/api' };" > public/config.js
 RUN npm run build
 
 # Production stage
