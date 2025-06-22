@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: orderdb
+      POSTGRES_PASSWORD: 3e8f79ccABC-
+      POSTGRES_DB: orderdb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    depends_on:
+      - db
+    environment:
+      NEON_DB_URL: postgresql://orderdb:3e8f79ccABC-@db:5432/orderdb
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      API_KEY: ${API_KEY}
+    ports:
+      - "4000:4000"
+
+  caddy:
+    image: caddy:2
+    depends_on:
+      - server
+    volumes:
+      - ./assets/Caddyfile:/etc/caddy/Caddyfile
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  db_data:
