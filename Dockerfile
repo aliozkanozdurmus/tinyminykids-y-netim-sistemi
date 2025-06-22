@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Copy and build backend
 COPY server/ ./server
-RUN cd server && npm install --production && npm run build
+RUN cd server && npm install && npm run build && npm prune --production
 
 # Copy and build frontend
 COPY package.json pnpm-lock.yaml ./
