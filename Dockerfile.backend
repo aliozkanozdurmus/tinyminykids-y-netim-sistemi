@@ -11,15 +11,10 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
 COPY backend/.env.example .env
 COPY backend/.env.example .env
 # Use dependencies installed in build stage
-# Install production dependencies
-COPY backend/package.json ./
-RUN npm install --production
-COPY backend/package.json backend/package-lock.json* ./
-RUN npm install --production
-# Optionally install production deps if needed (should be present in node_modules already)
-RUN npm install --production
+# (node_modules copied from build stage; no need to reinstall)
 EXPOSE 3000
 CMD ["node", "dist/app.js"]
