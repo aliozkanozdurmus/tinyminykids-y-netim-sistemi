@@ -1,12 +1,11 @@
 // @ts-nocheck
 // Drizzle ORM configuration for Neon Postgres migrations
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 
 export default {
   schema: './drizzle/schema.ts',
   out: './drizzle/migrations',
-  driver: 'pg',
-  dbCredentials: {
-    connectionString: process.env.NEON_DB_URL!,
-  },
+  dialect: 'postgresql',
+  url: process.env.NEON_DB_URL!,
 } as any;
