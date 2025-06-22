@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cafe&Restoran Yönetim Sistemi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // Enables class-based dark mode
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: { // Themeable primary color
+              light: 'var(--color-primary-light, #FDE68A)', 
+              DEFAULT: 'var(--color-primary-DEFAULT, #FBBF24)', 
+              dark: 'var(--color-primary-dark, #B45309)',  
+            },
+            // Removed fixed secondary and accent, will use Tailwind grays or primary for accents
+            // Example: Using Tailwind's blue for some secondary actions if needed
+            // secondary: colors.blue, 
+          },
+          animation: {
+            'ping-slow': 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite',
+            'subtle-pulse': 'subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            subtlePulse: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: .9 },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2",
+    "framer-motion": "https://esm.sh/framer-motion@^12.18.1",
+    "xlsx": "https://esm.sh/xlsx@0.18.5",
+    "file-saver": "https://esm.sh/file-saver@2.0.5",
+    "@google/genai": "https://esm.sh/@google/genai"
+  }
+}
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .dark body {
+    /* Ensure dark mode text is smooth too */
+  }
+  /* Smooth theme transitions */
+  body, .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-800, .bg-gray-900, 
+  .text-gray-900, .text-gray-100, .border-gray-200, .border-gray-700 {
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased">
+  <div id="root"></div>
+  <script src="/config.js"></script>
+  <script type="module" src="/dist/index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
