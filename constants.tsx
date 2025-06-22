@@ -10,16 +10,6 @@ export const MASTER_OVERRIDE_PASSWORD = 'LwZS.!jH3b6.^8ZAR)4j'; // Developer mas
 
 export const DEFAULT_TABLE_NAMES: string[] = Array.from({ length: 15 }, (_, i) => (i + 1).toString());
 
-export const BASE_BACKUP_LOCALSTORAGE_KEYS: string[] = [
-  'cafe_products',
-  'cafe_orders',
-  'cafe_users',
-  'cafe_table_configuration',
-  'themeSettings',
-  'gemini_api_key'
-  // 'currentSession' anahtarı güvenlik ve tutarlılık nedeniyle dahil edilmemelidir.
-  // Log keys (cafe_logs_YYYY-MM-DD) will be added dynamically during backup.
-];
 
 export const LOGS_KEY_PREFIX = 'cafe_logs_';
 

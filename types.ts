@@ -19,10 +19,11 @@ export interface User {
 }
 
 export interface AuthenticatedSession {
-  userId: string; 
+  userId: string;
   role: UserRole;
   fullName: string;
   profilePhotoUrl?: string;
+  token: string;
 }
 
 export interface Product {
@@ -77,8 +78,6 @@ export interface ThemeSettings {
   appName: string;
   logoUrl: string;
   passwordProtectionActive: boolean;
-  dataSource: 'localStorage' | 'postgresql'; // New: Data source selection
-  backendApiUrl?: string; // New: URL for the backend API if postgresql is selected
 }
 
 export interface TableConfiguration {

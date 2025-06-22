@@ -10,7 +10,7 @@ import Modal from '../components/shared/Modal';
 import ProductForm from '../components/admin/ProductForm';
 import UserForm from '../components/admin/UserForm';
 import Input from '../components/shared/Input'; 
-import { ICONS, AVAILABLE_ACCENT_COLORS, ROLE_DISPLAY_NAMES, DEFAULT_IMAGE_URL, DEFAULT_TABLE_NAMES, CURRENCIES, formatPrice, DEFAULT_LOGO_URL, APP_NAME as DEFAULT_APP_NAME, BASE_BACKUP_LOCALSTORAGE_KEYS, LogActionTypeStrings } from '../constants';
+import { ICONS, AVAILABLE_ACCENT_COLORS, ROLE_DISPLAY_NAMES, DEFAULT_IMAGE_URL, DEFAULT_TABLE_NAMES, CURRENCIES, formatPrice, DEFAULT_LOGO_URL, APP_NAME as DEFAULT_APP_NAME, LogActionTypeStrings } from '../constants';
 import { ThemeContext } from '../contexts/ThemeContext';
 import { AuthContext } from '../contexts/AuthContext';
 import TableManagement from '../components/admin/TableManagement';
@@ -677,21 +677,16 @@ const SettingsManagement: React.FC = () => {
 
     if (!themeContext || !authContext) return <p>Tema veya Oturum Yöneticisi yüklenemedi.</p>;
     
-    const { 
-        theme, toggleTheme, 
-        accentColor, setAccentColor, 
+    const {
+        theme, toggleTheme,
+        accentColor, setAccentColor,
         currency, setCurrency,
         appName, setAppName,
         logoUrl, setLogoUrl,
-        passwordProtectionActive, setPasswordProtectionActive,
-        dataSource, backendApiUrl, setDataSourceAndApiUrl
+        passwordProtectionActive, setPasswordProtectionActive
     } = themeContext;
     const { logout } = authContext; 
 
-    const [localAppName, setLocalAppName] = useState(appName);
-    const [localLogoUrl, setLocalLogoUrl] = useState(logoUrl);
-    const [localDataSource, setLocalDataSource] = useState<'localStorage' | 'postgresql'>(dataSource);
-    const [localBackendApiUrl, setLocalBackendApiUrl] = useState(backendApiUrl || '');
 
     const [geminiApiKey, setGeminiApiKey] = useState<string>('');
     const [isKeyLoading, setIsKeyLoading] = useState<boolean>(false);
@@ -703,12 +698,6 @@ const SettingsManagement: React.FC = () => {
     const backupFileInputRef = useRef<HTMLInputElement>(null);
 
 
-    useEffect(() => { setLocalAppName(appName); }, [appName]);
-    useEffect(() => { setLocalLogoUrl(logoUrl); }, [logoUrl]);
-    useEffect(() => { 
-      setLocalDataSource(dataSource);
-      setLocalBackendApiUrl(backendApiUrl || '');
-    }, [dataSource, backendApiUrl]);
 
     const handleSaveAppName = () => {
         setAppName(localAppName.trim() || DEFAULT_APP_NAME); 
@@ -728,17 +717,6 @@ const SettingsManagement: React.FC = () => {
         setTimeout(() => setGeneralFeedback(null), 3000);
     };
 
-    const handleSaveDataSource = () => {
-      if (localDataSource === 'postgresql' && !localBackendApiUrl.trim()) {
-        setGeneralFeedback({type: 'error', text: 'PostgreSQL seçildiğinde Backend API URL\'si zorunludur.'});
-        return;
-      }
-      setDataSourceAndApiUrl(localDataSource, localBackendApiUrl);
-      setGeneralFeedback({type: 'success', text: `Veri kaynağı ayarları kaydedildi. Uygulama yeni ayarlarla çalışması için yeniden başlatılıyor...`});
-      setTimeout(() => {
-        window.location.reload();
-      }, 2500);
-    };
 
 
     const fetchApiKey = useCallback(async () => {
@@ -983,62 +961,7 @@ const SettingsManagement: React.FC = () => {
                     </div>
                 </div>
 
-                 {/* Database Settings Section */}
-                <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <h3 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-1 flex items-center">
-                        {ICONS.database("w-5 h-5 mr-2")} Veritabanı Ayarları
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        Uygulamanın kullanacağı veri kaynağını seçin. "PostgreSQL" seçeneği, sizin tarafınızdan geliştirilmiş harici bir Backend API'sine ihtiyaç duyar.
-                    </p>
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="dataSourceSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                Veri Kaynağı
-                            </label>
-                            <div className="relative max-w-xs">
-                                <select
-                                    id="dataSourceSelect"
-                                    value={localDataSource}
-                                    onChange={(e) => setLocalDataSource(e.target.value as 'localStorage' | 'postgresql')}
-                                    className="appearance-none w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:border-gray-400 px-4 py-2.5 pr-8 rounded-lg shadow-sm leading-tight focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT/40 focus:border-primary-DEFAULT text-gray-700 dark:text-gray-200"
-                                >
-                                    <option value="localStorage">Yerel Depolama (localStorage)</option>
-                                    <option value="postgresql">PostgreSQL (Harici API ile)</option>
-                                </select>
-                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
-                                   {ICONS.chevronDown("w-5 h-5")}
-                                </div>
-                            </div>
-                        </div>
-
-                        {localDataSource === 'postgresql' && (
-                            <Input
-                                label="Backend API URL'si"
-                                value={localBackendApiUrl}
-                                onChange={(e) => setLocalBackendApiUrl(e.target.value)}
-                                placeholder="https://sizin-api-adresiniz.com/api"
-                                containerClassName="mb-0 sm:mb-4"
-                                leftIcon={ICONS.key("w-4 h-4 opacity-0")} // For alignment, but invisible if not needed
-                            />
-                        )}
-                        <Button 
-                            onClick={handleSaveDataSource} 
-                            className="w-full sm:w-auto"
-                            size="md"
-                        >
-                            Kaydet ve Yeniden Başlat
-                        </Button>
-                        {localDataSource === 'postgresql' && (
-                            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2 p-2 bg-yellow-50 dark:bg-yellow-700/30 rounded border border-yellow-200 dark:border-yellow-600">
-                                **Önemli:** "PostgreSQL" seçeneğinin çalışması için, tüm veri işlemlerini (ürünler, siparişler, kullanıcılar vb.) yönetecek kendi Backend API'nizi geliştirip bu URL'yi doğru bir şekilde girmeniz gerekmektedir. Aksi takdirde uygulama veri çekemez veya kaydedemez. Mevcut `apiService.ts` dosyası henüz bu harici API çağrılarını içermemektedir.
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-
-                {/* Gemini API Key Section */}
+                 {/* Gemini API Key Section */}
                 <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <h3 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-1 flex items-center">
                         {ICONS.sparkles("w-5 h-5 mr-2 text-primary-DEFAULT")} Google Gemini API Anahtarı
@@ -1084,47 +1007,9 @@ const SettingsManagement: React.FC = () => {
                         Uygulamanın tüm verilerini (ürünler, siparişler, kullanıcılar, ayarlar, loglar vb.) yedekleyin veya bir yedekten geri yükleyin. Bu işlem sadece "Yerel Depolama" veri kaynağı aktifken geçerlidir.
                     </p>
                     <FeedbackDisplay message={backupRestoreFeedback} />
-                    {dataSource === 'localStorage' ? (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                                <Button 
-                                    onClick={handleBackupData} 
-                                    leftIcon={ICONS.download("w-4 h-4")}
-                                    isLoading={isKeyLoading && !backupFileInputRef.current?.files?.length} 
-                                    variant="outline"
-                                    className="w-full"
-                                >
-                                    Tüm Verileri Yedekle
-                                </Button>
-                                <div>
-                                    <input 
-                                        type="file" 
-                                        accept=".json" 
-                                        ref={backupFileInputRef}
-                                        onChange={handleRestoreData}
-                                        style={{ display: 'none' }} 
-                                        id="backup-file-input"
-                                    />
-                                    <Button 
-                                        onClick={() => backupFileInputRef.current?.click()}
-                                        leftIcon={ICONS.upload("w-4 h-4")}
-                                        isLoading={isKeyLoading && !!backupFileInputRef.current?.files?.length}
-                                        variant="outline"
-                                        className="w-full"
-                                    >
-                                        Yedekten Geri Yükle
-                                    </Button>
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                                <span className="font-semibold">Önemli:</span> Geri yükleme işlemi mevcut tüm verilerin üzerine yazar ve işlem sonrası oturumunuz sonlandırılır.
-                            </p>
-                        </>
-                    ) : (
-                        <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2 p-2 bg-yellow-50 dark:bg-yellow-700/30 rounded border border-yellow-200 dark:border-yellow-600">
-                            Yedekleme ve geri yükleme işlevi yalnızca "Yerel Depolama (localStorage)" veri kaynağı seçiliyken kullanılabilir. PostgreSQL için yedekleme ve geri yükleme işlemleri veritabanı sağlayıcınız (örn: Neon) üzerinden veya kendi backend API'niz aracılığıyla yapılmalıdır.
-                        </p>
-                    )}
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2 p-2 bg-yellow-50 dark:bg-yellow-700/30 rounded border border-yellow-200 dark:border-yellow-600">
+                        Yedekleme ve geri yükleme işlemleri backend API üzerinden yapılmalıdır.
+                    </p>
                 </div>
             </div>
         </AdminSection>

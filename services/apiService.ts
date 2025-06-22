@@ -1,11 +1,11 @@
-import { AuthenticatedSession, ThemeSettings, User, Product, Order, TableConfiguration, LogEntry } from '../types';
+import { AuthenticatedSession, ThemeSettings, User, Product, Order, TableConfiguration, LogEntry, LogActionType, UserRole } from '../types';
 
-const API_URL = import.meta.env.VITE_BACKEND_API_URL ?? '';
+const API_URL: string = ((import.meta as any).env?.VITE_BACKEND_API_URL as string) || '';
 
 let authToken: string | null = null;
 
 async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const headers: HeadersInit = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string> || {}) };
   if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!response.ok) {
@@ -139,5 +139,53 @@ export const apiService = {
 
   async getLogById(id: string): Promise<LogEntry> {
     return fetchJson<LogEntry>(`/logs/${id}`);
+  },
+
+  async addLogEntry(action: LogActionType, details: string, targetId?: string, userId?: string, userFullName?: string, userRole?: UserRole): Promise<LogEntry> {
+    return fetchJson<LogEntry>('/logs', {
+      method: 'POST',
+      body: JSON.stringify({ action, details, targetId, userId, userFullName, userRole }),
+    });
+  },
+
+  async initializeDefaultUsers(): Promise<void> {
+    await fetchJson<void>('/initialize_default_users', { method: 'POST' });
+  },
+
+  async seedInitialProductData(): Promise<void> {
+    await fetchJson<void>('/seed_initial_product_data', { method: 'POST' });
+  },
+
+  // Export and import all data via backend
+  async exportAllData(): Promise<string> {
+    return fetchJson<string>('/exportAllData');
+  },
+
+  async importAllData(jsonData: string): Promise<void> {
+    return fetchJson<void>('/importAllData', {
+      method: 'POST',
+      body: jsonData
+    });
+  },
+
+  // Gemini API key persistence
+  async getGeminiApiKey(): Promise<string> {
+    return fetchJson<string>('/gemini_api_key');
+  },
+
+  async updateGeminiApiKey(key: string): Promise<void> {
+    return fetchJson<void>('/gemini_api_key', {
+      method: 'PUT',
+      body: JSON.stringify({ key })
+    });
+  },
+
+  // Log dates and filtered logs
+  async getAvailableLogDates(): Promise<string[]> {
+    return fetchJson<string[]>('/logs/dates');
+  },
+
+  async getLogsByDate(date: string): Promise<LogEntry[]> {
+    return fetchJson<LogEntry[]>(`/logs?date=${encodeURIComponent(date)}`);
   },
 };

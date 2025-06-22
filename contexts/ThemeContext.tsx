@@ -10,15 +10,12 @@ interface ThemeContextType {
   appName: string;
   logoUrl: string;
   passwordProtectionActive: boolean;
-  dataSource: 'localStorage' | 'postgresql';
-  backendApiUrl?: string;
   toggleTheme: () => void;
   setAccentColor: (colorName: string) => void;
   setCurrency: (currencyCode: CurrencyCode) => void;
   setAppName: (name: string) => void;
   setLogoUrl: (url: string) => void;
   setPasswordProtectionActive: (isActive: boolean) => void;
-  setDataSourceAndApiUrl: (source: 'localStorage' | 'postgresql', apiUrl?: string) => void;
   themeSettings: ThemeSettings;
 }
 
@@ -31,36 +28,16 @@ const defaultThemeSettings: ThemeSettings = {
   appName: APP_NAME,
   logoUrl: DEFAULT_LOGO_URL,
   passwordProtectionActive: false,
-  dataSource: 'localStorage',
-  backendApiUrl: '',
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
-    const storedSettings = localStorage.getItem('themeSettings');
-    let parsedSettings = defaultThemeSettings;
-    if (storedSettings) {
-        try {
-            const fromStorage = JSON.parse(storedSettings) as Partial<ThemeSettings>; // Use Partial for robustness
-            parsedSettings = {
-                selectedTheme: fromStorage.selectedTheme || defaultThemeSettings.selectedTheme,
-                primaryColor: AVAILABLE_ACCENT_COLORS[fromStorage.primaryColor || ''] ? fromStorage.primaryColor! : defaultThemeSettings.primaryColor,
-                currency: CURRENCIES[fromStorage.currency || ''] ? fromStorage.currency! : defaultThemeSettings.currency,
-                appName: fromStorage.appName || defaultThemeSettings.appName,
-                logoUrl: fromStorage.logoUrl || defaultThemeSettings.logoUrl,
-                passwordProtectionActive: typeof fromStorage.passwordProtectionActive === 'boolean' 
-                                            ? fromStorage.passwordProtectionActive 
-                                            : defaultThemeSettings.passwordProtectionActive,
-                dataSource: fromStorage.dataSource === 'postgresql' ? 'postgresql' : 'localStorage',
-                backendApiUrl: fromStorage.backendApiUrl || defaultThemeSettings.backendApiUrl,
-            };
-        } catch (e) {
-            console.error("Failed to parse themeSettings from localStorage, using defaults.", e);
-            parsedSettings = defaultThemeSettings;
-        }
-    }
-    return parsedSettings;
-  });
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
+  
+  useEffect(() => {
+    apiService.getThemeSettings()
+      .then(settings => setThemeSettings(settings))
+      .catch(error => console.error("Failed to load themeSettings from API", error));
+  }, []);
 
   const applyThemeToDOM = useCallback((currentTheme: Theme, currentAccentColorName: string) => {
     const root = document.documentElement;
@@ -95,11 +72,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     applyThemeToDOM(themeSettings.selectedTheme, themeSettings.primaryColor);
-    try {
-      localStorage.setItem('themeSettings', JSON.stringify(themeSettings));
-    } catch (error) {
-      console.error("Error saving themeSettings to localStorage:", error);
-    }
+    apiService.updateThemeSettings(themeSettings)
+      .catch(error => console.error("Error saving themeSettings to API:", error));
     document.title = themeSettings.appName;
   }, [themeSettings, applyThemeToDOM]);
 
@@ -158,34 +132,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   };
 
-  const setDataSourceAndApiUrl = (source: 'localStorage' | 'postgresql', apiUrl?: string) => {
-    const newApiUrl = source === 'postgresql' ? (apiUrl || '').trim() : '';
-    apiService.addLogEntry(LogActionType.SETTINGS_UPDATED_DATA_SOURCE, `Veri kaynağı değiştirildi: ${source}. API URL: ${newApiUrl || 'Yok'}`);
-    setThemeSettings(prevSettings => ({
-        ...prevSettings,
-        dataSource: source,
-        backendApiUrl: newApiUrl,
-    }));
-  };
   
   return (
-    <ThemeContext.Provider value={{ 
-        theme: themeSettings.selectedTheme, 
-        accentColor: themeSettings.primaryColor, 
+    <ThemeContext.Provider value={{
+        theme: themeSettings.selectedTheme,
+        accentColor: themeSettings.primaryColor,
         currency: themeSettings.currency,
         appName: themeSettings.appName,
         logoUrl: themeSettings.logoUrl,
         passwordProtectionActive: themeSettings.passwordProtectionActive,
-        dataSource: themeSettings.dataSource,
-        backendApiUrl: themeSettings.backendApiUrl,
-        toggleTheme, 
-        setAccentColor, 
+        toggleTheme,
+        setAccentColor,
         setCurrency,
         setAppName,
         setLogoUrl,
         setPasswordProtectionActive,
-        setDataSourceAndApiUrl,
-        themeSettings 
+        themeSettings
     }}>
       {children}
     </ThemeContext.Provider>

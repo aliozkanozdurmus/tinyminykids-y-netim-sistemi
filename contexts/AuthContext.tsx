@@ -18,59 +18,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<AuthenticatedSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadSessionFromStorage = useCallback(() => {
+  const loadSession = async () => {
     setIsLoading(true);
-    const storedSession = localStorage.getItem('currentSession');
-    if (storedSession) {
-      try {
-        const parsedSession = JSON.parse(storedSession) as AuthenticatedSession;
-        if (parsedSession && parsedSession.userId && parsedSession.role && parsedSession.fullName) {
-          setSession(parsedSession);
-        } else {
-          localStorage.removeItem('currentSession');
-        }
-      } catch (error) {
-        console.error("Failed to parse session from storage", error);
-        localStorage.removeItem('currentSession');
-      }
+    try {
+      const currentSession = await apiService.getCurrentSession();
+      setSession(currentSession);
+    } catch (error) {
+      console.error("Failed to load session from API", error);
+      setSession(null);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, []);
-
+  };
+  
   useEffect(() => {
     apiService.initializeDefaultUsers()
-      .then(() => {
-        return apiService.seedInitialProductData();
-      })
-      .then(() => {
-        loadSessionFromStorage();
-      })
+      .then(() => apiService.seedInitialProductData())
+      .then(() => loadSession())
       .catch(error => {
         console.error("Error during application initialization (users/seeding):", error);
-        loadSessionFromStorage(); 
+        loadSession();
       });
-  }, [loadSessionFromStorage]);
+  }, []);
 
   const login = async (userIdOrAdminRole: string, password_plain: string): Promise<boolean> => {
-    setIsLoading(true);
-    const loggedInSession = await apiService.loginUser(userIdOrAdminRole, password_plain); // loginUser now handles its own logging
-    if (loggedInSession) {
-      setSession(loggedInSession);
-      localStorage.setItem('currentSession', JSON.stringify(loggedInSession));
+      setIsLoading(true);
+      const loggedInSession = await apiService.loginUser(userIdOrAdminRole, password_plain);
+      if (loggedInSession) {
+        setSession(loggedInSession);
+        apiService.setAuthToken(loggedInSession.token);
+        setIsLoading(false);
+        return true;
+      }
       setIsLoading(false);
-      return true;
-    }
-    setIsLoading(false);
-    return false;
-  };
+      return false;
+    };
 
-  const logout = () => {
-    if (session) {
-      apiService.addLogEntry(LogActionType.USER_LOGOUT, `${session.fullName} (${session.role}) çıkış yaptı.`, session.userId, session.userId, session.fullName, session.role);
-    }
-    setSession(null);
-    localStorage.removeItem('currentSession');
-  };
+  const logout = async () => {
+      if (session) {
+        apiService.addLogEntry(LogActionType.USER_LOGOUT, `${session.fullName} (${session.role}) çıkış yaptı.`, session.userId, session.userId, session.fullName, session.role);
+      }
+      setIsLoading(true);
+      try {
+        await apiService.logoutUser();
+      } catch (error) {
+        console.error("Error during logout", error);
+      } finally {
+        apiService.setAuthToken(null);
+        setSession(null);
+        setIsLoading(false);
+      }
+    };
 
   if (isLoading && !session) {
      return (
