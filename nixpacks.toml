@@ -6,10 +6,11 @@ command = "npm install"
 command = "npm run migrate:push && npm run build"
 
 [phases.start]
-command = "npm run preview -- --host 0.0.0.0 --port $PORT"
+command = "npm --prefix server install && npm --prefix server run build && npm --prefix server start & caddy run --config /assets/Caddyfile --adapter caddyfile"
 
 [env]
 NEON_DB_URL = "$NEON_DB_URL"
+VITE_BACKEND_API_URL = "$VITE_BACKEND_API_URL"
 ADMIN_PASSWORD = "$ADMIN_PASSWORD"
 GEMINI_API_KEY = "$GEMINI_API_KEY"
 API_KEY = "$API_KEY"
